@@ -8,20 +8,25 @@ class PoloniexDriver:
     name = "Poloniex"
 
     def __init__(self, api_key, secret):
-        api_p='UR0WOR8H-A8A45PZX-XWQ6BCS1-8T1D2XZN'
-        key_p='bccb9947c68c835c1085f0dd8434824225069c6538fda2747e22b382466e3e60d752d5c56852e231f5c24b5ee736588811f51fc691fc266f6b14f50f6d6e0c39'
+        api_p=''
+        key_p=''
         self.api=Poloniex(api_key, secret)
         pass
 
-    def get_market_info(self, pairs):
-        pair = '{0}_{1}'.format(pairs[0], pairs[1])
+        
+    def get_market_info(self):
+        market={}
         try:
-            ticker=self.api.returnTicker()[pair]
-            market=(pairs[0], pairs[1], float(ticker['lowestAsk']), float(ticker['highestBid']))
+            tickers=self.api.returnTicker()
+            for pairs, ticker in tickers.iteritems():
+                pair=pairs.split('_')
+                pair=tuple(pair)
+                market[pair]=(float(ticker['lowestAsk']), float(ticker['highestBid']))                   
         except:
-            market=('0','0','0','0')
+            market={}
         return market
 
+        
     def get_txFee(self):
         txfee=list()
         currencies=self.api.returnCurrencies()
@@ -29,6 +34,7 @@ class PoloniexDriver:
             txfee.append(( k, v['name'], v['txFee'])) # create list of tuples(len = 2) 1 - trade, 2- trade name 3 - txFee
         return txfee
 
+        
     def get_order(self, pairs): # return from lists sells and buy
         pair = '{0}_{1}'.format(pairs[0], pairs[1])
         try:

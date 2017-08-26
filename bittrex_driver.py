@@ -8,21 +8,26 @@ class BittrexDriver:
     name = "Bittrex"
 
     def __init__(self, api_key, secret):
-        api_b='20cfb884f5c141dead2a58c56757887d'
-        key_b='4d0e5ad81e574816bf047fb0d18158db'
+        api_b=''
+        key_b=''
         self.api = Bittrex(api_key, secret)
         pass
 
-    def get_market_info(self, pairs): # to get data ask and bid for pair
-        # pairs: tuple of pair (len 2)
-        pair = '{0}-{1}'.format(pairs[0], pairs[1])
+        
+    def get_market_info(self): # to get data ask and bid for pair
+        market={}
         try:
-            ticker=self.api.get_ticker(pair)
-            market=(pairs[0], pairs[1], float(ticker['result']['Ask']), float(ticker['result']['Bid']))
+            tickers=self.api.get_market_summaries()
+            tickers=tickers['result']
+            for ticker in tickers:
+                pair=ticker['MarketName'].split('-')
+                pair=tuple(pair)
+                market[pair]=(float(ticker['Ask']), float(ticker['Bid'])) 
         except:
-            market=('0','0','0','0')
-        return market # list (len=4) of data main coin, currency, aks, bid
+            market={}
+        return market 
 
+        
     def get_order(self, pairs):
         pair = '{0}-{1}'.format(pairs[0], pairs[1])
         try:
@@ -36,6 +41,7 @@ class BittrexDriver:
             order={'ask_rate': '0', 'ask_quanity': '0', 'bid_rate': '0', 'bid_quanity': '0'}
         return order
 
+        
     def get_txFee(self):
         txfee=list()
         currencies=self.api.get_currencies()
@@ -43,6 +49,7 @@ class BittrexDriver:
             txfee.append((i['Currency'], i['CurrencyLong'], float(i['TxFee'])))
         return txfee # create list of tuples(len = 3) 1 - trade, 2- trade name 3 - txFee
 
+        
     def create_pairs(self):
         fee = self.get_txFee()
         # txfee list of tuples(len = 3) 1 - trade, 2- trade name 3 - txFee
